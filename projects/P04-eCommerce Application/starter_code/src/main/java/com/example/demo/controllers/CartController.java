@@ -3,6 +3,8 @@ package com.example.demo.controllers;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,16 +24,18 @@ import com.example.demo.model.requests.ModifyCartRequest;
 @RestController
 @RequestMapping("/api/cart")
 public class CartController {
-	
+
+	private static final Logger log = LoggerFactory.getLogger(CartController.class);
+
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private CartRepository cartRepository;
-	
+
 	@Autowired
 	private ItemRepository itemRepository;
-	
+
 	@PostMapping("/addToCart")
 	public ResponseEntity<Cart> addTocart(@RequestBody ModifyCartRequest request) {
 		User user = userRepository.findByUsername(request.getUsername());
@@ -44,11 +48,12 @@ public class CartController {
 		}
 		Cart cart = user.getCart();
 		IntStream.range(0, request.getQuantity())
-			.forEach(i -> cart.addItem(item.get()));
+				.forEach(i -> cart.addItem(item.get()));
+		log.info("Add item to {}'s cart: {}", request.getUsername(), request.getItemId());
 		cartRepository.save(cart);
 		return ResponseEntity.ok(cart);
 	}
-	
+
 	@PostMapping("/removeFromCart")
 	public ResponseEntity<Cart> removeFromcart(@RequestBody ModifyCartRequest request) {
 		User user = userRepository.findByUsername(request.getUsername());
@@ -61,9 +66,10 @@ public class CartController {
 		}
 		Cart cart = user.getCart();
 		IntStream.range(0, request.getQuantity())
-			.forEach(i -> cart.removeItem(item.get()));
+				.forEach(i -> cart.removeItem(item.get()));
+		log.info("Remove item from {}'s cart: {}", request.getUsername(), request.getItemId());
 		cartRepository.save(cart);
 		return ResponseEntity.ok(cart);
 	}
-		
+
 }
